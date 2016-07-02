@@ -1,4 +1,4 @@
-package com.example;
+package com.underdog.jersey.grizzly;
 
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
