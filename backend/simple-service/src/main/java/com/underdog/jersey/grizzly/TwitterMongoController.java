@@ -5,11 +5,15 @@ import org.bson.Document;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Locale;
 
 import static java.util.Arrays.asList;
 
+import com.mongodb.Block;
 import com.mongodb.MongoClient;
+import com.mongodb.client.FindIterable;
+import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 
 /**
@@ -19,10 +23,12 @@ public class TwitterMongoController {
 
 	MongoClient mongoClient;
 	MongoDatabase db;
+	MongoCollection<Document> favoritedUsers;
 	
 	public TwitterMongoController(){
 		mongoClient = new MongoClient();
 		db = mongoClient.getDatabase("twitter");
+		favoritedUsers	= db.getCollection("favoritedUsers");
 	}
 	
     /**
@@ -30,16 +36,18 @@ public class TwitterMongoController {
      * to the client as "text/plain" media type.
      *
      * @return String that will be returned as a text/plain response.
+     * @throws ParseException 
      * @throws TwitterException 
      */
     
     
-    public String autoFavorite(String queryString) {
-    	/*DateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.ENGLISH);
-    	db.getCollection("favoritedUsers").insertOne(
-    	        new Document("userId","32103983120812038102381023802138")
-    	                .append("user", "testUser")
-    	                .append("date", format.parse("2014-10-01T00:00:00Z")));*/
+    public boolean addFavorite(long userId, String userScreenName) {
+    	boolean inserted = true;
+    	
+    	favoritedUsers.insertOne(
+    	        new Document("userId", userId)
+    	                .append("userScreenName", userScreenName)
+    	                .append("lastFavoritedDate", new Date()));
     	/*
     	// The factory instance is re-useable and thread safe.
         Twitter twitter = TwitterFactory.getSingleton();
@@ -60,7 +68,31 @@ public class TwitterMongoController {
 		
         twitter.createFavorite(lastId);
 		            	*/
-        return "Got it!";        
-    	//return query;
+        return inserted;
+    }    
+    
+    
+    public boolean isFavoritedUser(long userId){
+    	boolean isFavorite	= true;
+    	if(favoritedUsers.count(new Document("userId", userId)) < 1){
+    		isFavorite = false;
+    	}
+    	/*FindIterable<Document> results = favoritedUsers.find(new Document("userId", userId));
+    	    	
+    	results.forEach(new Block<Document>() {
+    	    @Override
+    	    public void apply(final Document document) {
+    	        System.out.println(document);
+    	    }
+    	});*/    	
+    	return isFavorite;
     }
+    
+    
+    public boolean updateOneUser(long userId){
+    	boolean updated	= false;
+    	//favoritedUsers.updateOne(new Document("userId", userId), new Document("$currentDate", new Document("lastFavoriteFoundDate", true)))
+    	return updated;
+    }
+        
 }
