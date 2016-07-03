@@ -41,34 +41,13 @@ public class TwitterMongoController {
      */
     
     
-    public boolean addFavorite(long userId, String userScreenName) {
-    	boolean inserted = true;
+    public void addFavorite(long userId, String userScreenName) {
     	
     	favoritedUsers.insertOne(
     	        new Document("userId", userId)
     	                .append("userScreenName", userScreenName)
     	                .append("lastFavoritedDate", new Date()));
-    	/*
-    	// The factory instance is re-useable and thread safe.
-        Twitter twitter = TwitterFactory.getSingleton();
-        Query query = new Query("\"mi blog\"");
-        //query.count(100);//Get 100 tweets
-        
-        QueryResult result = twitter.search(query);
-               
-        int counter = 0;
-        long lastId	= 0;
-        
-        for (Status status : result.getTweets()) {
-            System.out.println("---The entire status: "+status.toString());
-            counter++;
-            lastId	= status.getId();
-            System.out.println("Counter: "+counter);
-        }
-		
-        twitter.createFavorite(lastId);
-		            	*/
-        return inserted;
+    	
     }    
     
     

@@ -26,9 +26,11 @@ import twitter4j.User;
 public class AutoTwitterFavorite {
 
 	TwitterMongoController mongoController;
+	Twitter twitter;
 	
 	public AutoTwitterFavorite(){
 		mongoController = new TwitterMongoController();
+		twitter = TwitterFactory.getSingleton();
 	}
     /**
      * Method handling HTTP GET requests. The returned object will be sent
@@ -43,50 +45,46 @@ public class AutoTwitterFavorite {
     public String autoFavorite(@QueryParam("q") String queryString) throws TwitterException, ParseException {
     	
     	// The factory instance is re-useable and thread safe.
-        Twitter twitter = TwitterFactory.getSingleton();
+        
         Query query = new Query(queryString);
-        //query.count(100);//Get 100 tweets
+        query.count(100);//Get 100 tweets
         
         QueryResult result = twitter.search(query);
                
         int counter = 0;
-        long lastId	= 0;
+        int insertedFavoritedUsers	= 0;
         
         for (Status status : result.getTweets()) {
-            //System.out.println("---The entire status: "+status.toString());
-            
-            User user = status.getUser();
-            
-            System.out.println("User id: "+user.getId());
-            System.out.println("Username: "+user.getScreenName());
-            System.out.println("Is favorited: "+status.isFavorited());
-            System.out.println("Current date: "+ new Date());
-            
+        	if(favoriteUserFromStatus(status)){
+        		insertedFavoritedUsers++;
+        	}            
             counter++;
-            lastId	= status.getId();
-            System.out.println("Counter: "+counter);
+            
         }
-		
-        //twitter.createFavorite(lastId);
-    	
-    	
-    	//controller.addFavorite();
-    	long userId	= 32103;
-    	mongoController.isFavoritedUser(userId);
-    	
+        System.out.println("Total count: "+counter);
+        System.out.println("Counter: "+insertedFavoritedUsers);
+        
         return "Got it!";        
     	//return query;
     }
     
-    private boolean insertUser(Status status){
+    
+    private boolean favoriteUserFromStatus(Status status){
+
     	boolean inserted = false;
-    	
     	User user = status.getUser();
     	
     	if(!mongoController.isFavoritedUser(user.getId())){
-    		mongoController.addFavorite(user.getId(), user.getScreenName());
+    		try {
+				twitter.createFavorite(status.getId());
+				mongoController.addFavorite(user.getId(), user.getScreenName());
+	    		inserted = true;
+			} catch (TwitterException e) {
+				System.out.println("Error creating favorite on twitter: "+e);
+			}    		
     	}
     	    	
     	return inserted;
     }
+    
 }
