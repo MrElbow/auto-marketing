@@ -57,12 +57,14 @@ public class AutoTwitterFavorite {
         for (Status status : result.getTweets()) {
         	if(favoriteUserFromStatus(status)){
         		insertedFavoritedUsers++;
-        	}            
+        	}
+        	
             counter++;
-            
         }
+        
+        
         System.out.println("Total count: "+counter);
-        System.out.println("Counter: "+insertedFavoritedUsers);
+        System.out.println("Favorited count: "+insertedFavoritedUsers);
         
         return "Got it!";        
     	//return query;
@@ -74,7 +76,7 @@ public class AutoTwitterFavorite {
     	boolean inserted = false;
     	User user = status.getUser();
     	
-    	if(!mongoController.isFavoritedUser(user.getId())){
+    	if((!mongoController.isFavoritedUser(user.getId())) && (!status.isFavorited())){
     		try {
 				twitter.createFavorite(status.getId());
 				mongoController.addFavorite(user.getId(), user.getScreenName());
