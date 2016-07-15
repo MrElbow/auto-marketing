@@ -24,11 +24,15 @@ public class TwitterMongoController {
 	MongoClient mongoClient;
 	MongoDatabase db;
 	MongoCollection<Document> favoritedUsers;
+	MongoCollection<Document> followedUsers;
+	MongoCollection<Document> unfollowedUsers;
 	
 	public TwitterMongoController(){
 		mongoClient = new MongoClient();
 		db = mongoClient.getDatabase("twitter");
 		favoritedUsers	= db.getCollection("favoritedUsers");
+		followedUsers	= db.getCollection("followedUsers");
+		unfollowedUsers	= db.getCollection("unfollowedUsers");
 	}
 	
     /**
@@ -42,31 +46,52 @@ public class TwitterMongoController {
     
     
     public void addFavorite(long userId, String userScreenName) {
-    	
     	favoritedUsers.insertOne(
     	        new Document("userId", userId)
     	                .append("userScreenName", userScreenName)
     	                .append("lastFavoritedDate", new Date()));
-    	
-    }    
+    }
+
     
+    public void addFollow(long userId, String userScreenName) {
+    	followedUsers.insertOne(
+    	        new Document("userId", userId)
+    	                .append("userScreenName", userScreenName)
+    	                .append("followDate", new Date()));
+    }
+    
+    public void addUnfollow(long userId, String userScreenName) {
+    	unfollowedUsers.insertOne(
+    	        new Document("userId", userId)
+    	                .append("userScreenName", userScreenName)
+    	                .append("followDate", new Date()));
+    }
     
     public boolean isFavoritedUser(long userId){
     	boolean isFavorite	= true;
     	if(favoritedUsers.count(new Document("userId", userId)) < 1){
     		isFavorite = false;
-    	}
-    	/*FindIterable<Document> results = favoritedUsers.find(new Document("userId", userId));
-    	    	
-    	results.forEach(new Block<Document>() {
-    	    @Override
-    	    public void apply(final Document document) {
-    	        System.out.println(document);
-    	    }
-    	});*/    	
+    	}	
     	return isFavorite;
     }
     
+    
+    public boolean isFollowedUser(long userId){
+    	boolean isFollowed	= true;
+    	if(followedUsers.count(new Document("userId", userId)) < 1){
+    		isFollowed = false;
+    	}	
+    	return isFollowed;
+    }
+    
+    
+    public boolean isUnfollowedUser(long userId){
+    	boolean isUnfollowed	= true;
+    	if(unfollowedUsers.count(new Document("userId", userId)) < 1){
+    		isUnfollowed = false;
+    	}	
+    	return isUnfollowed;
+    }
     
     public boolean updateOneUser(long userId){
     	boolean updated	= false;

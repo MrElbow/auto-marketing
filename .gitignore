@@ -1,1 +1,2 @@
 backend/simple-service/twitter4j.properties
+*.log
